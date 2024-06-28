@@ -1,18 +1,25 @@
-import { configureStore } from "redux";
-import { devToolsEnhancer } from "@redux-devtools/extension";
+import { combineReducers, configureStore } from "redux";
+import { contactReducer } from "./contactsSlice";
+import { filterReducer } from "./filtersSlice";
+import { persistReducer, persistStore } from "redux-persist/es/persistReducer";
+import storage from "redux-persist/lib/storage";
 
-const initialState = {
-    contacts: {
-        items: []
-    },
-    filters: {
-        name: ""
-    }
+const persistConfig = {
+  key: "contacts",
+  storage,
 };
 
-const rootReducer = (state = initialState, action) => {
-  return state;
-};
+const rootReducer = combineReducers({
+  contacts: persistReducer(persistConfig, contactReducer),
+  filters: filterReducer,
+});
 
-const enhancer = devToolsEnhancer();
-export const store = configureStore(rootReducer, enhancer);
+export const store = configureStore({
+    reducer: rootReducer,
+    middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
+});
+
+export const persistor = persistStore(store);
